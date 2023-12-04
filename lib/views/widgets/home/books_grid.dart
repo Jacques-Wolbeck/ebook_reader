@@ -1,10 +1,9 @@
-import 'dart:async';
-
 import 'package:ebook_reader/shared/models/book_model.dart';
-import 'package:ebook_reader/shared/services/api_service.dart';
+import 'package:ebook_reader/shared/stores/books/books_store.dart';
 import 'package:ebook_reader/views/widgets/app_progress_indicator.dart';
 import 'package:ebook_reader/views/widgets/home/books_bottom_sheet.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 
 class BooksGrid extends StatefulWidget {
   const BooksGrid({super.key});
@@ -14,51 +13,31 @@ class BooksGrid extends StatefulWidget {
 }
 
 class _BooksGridState extends State<BooksGrid> {
+  final _store = BooksStore();
   final _scrollController = ScrollController();
-  final _streamController = StreamController<List<dynamic>>();
-  late final List<dynamic> dataList;
 
   @override
   void initState() {
     super.initState();
-    _loadData();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _streamController.close();
-  }
-
-  _loadData() async {
-    dataList = await ApiService.instance.fetchData();
-    _streamController.add(dataList);
+    _store.loadData();
   }
 
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
-    return StreamBuilder(
-        stream: _streamController.stream,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return const Center(
-              child: Text('Erro ao carregar os dados'),
-            );
-          }
-          if (!snapshot.hasData) {
-            return const Center(
-              child: AppProgressIndicator(),
-            );
-          } else {
-            final booksList = snapshot.data as List<BookModel>;
-            if (booksList.isEmpty) {
-              return const Center(child: Text('Sem livros disponíveis'));
-            } else {
-              return _booksGridView(booksList, screenSize);
-            }
-          }
-        });
+    return Observer(builder: (_) {
+      if (_store.isLoading) {
+        return const Center(
+          child: AppProgressIndicator(),
+        );
+      } else {
+        if (_store.booksList.isEmpty) {
+          return const Center(child: Text('Sem livros disponíveis'));
+        } else {
+          return _booksGridView(_store.booksList, screenSize);
+        }
+      }
+    });
   }
 
   Widget _booksGridView(List<BookModel> booksList, Size screenSize) {

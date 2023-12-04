@@ -1,18 +1,17 @@
+import 'package:dio/dio.dart';
 import 'package:ebook_reader/shared/models/book_model.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 class ApiService {
   static final ApiService instance = ApiService._init();
   ApiService._init();
+  final _dio = Dio();
 
   Future<List<BookModel>> fetchData() async {
-    var url = Uri.parse('https://escribo.com/books.json');
     try {
-      final response = await http.get(url);
+      final response = await _dio.get('https://escribo.com/books.json');
       if (response.statusCode == 200) {
-        final jsonResponse = jsonDecode(response.body);
+        final jsonResponse = response.data;
         return List<BookModel>.from(jsonResponse
             .map((value) => BookModel.fromJson(value as Map<String, dynamic>)));
       }

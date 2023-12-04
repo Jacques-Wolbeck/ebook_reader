@@ -14,6 +14,8 @@ class BooksTabBar {
   static TabBar _tabs(BuildContext context) {
     return TabBar(
       indicatorWeight: 4.0,
+      dividerHeight: 2.0,
+      dividerColor: Theme.of(context).colorScheme.primaryContainer,
       indicatorColor: Theme.of(context).colorScheme.primary,
       unselectedLabelColor: Theme.of(context).colorScheme.primaryContainer,
       tabs: const <Widget>[

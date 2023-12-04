@@ -1,8 +1,10 @@
 import 'package:ebook_reader/shared/models/book_model.dart';
-import 'package:ebook_reader/utils/arguments/views_arguments.dart';
+import 'package:ebook_reader/shared/stores/vocsy_epub/vocsy_epub_store.dart';
 import 'package:ebook_reader/views/widgets/app_progress_indicator.dart';
-import 'package:ebook_reader/views/widgets/buttons.dart/default_button.dart';
+import 'package:ebook_reader/views/widgets/buttons/default_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:vocsy_epub_viewer/epub_viewer.dart';
 
 class BooksBottomSheet extends StatefulWidget {
   final BookModel book;
@@ -13,6 +15,8 @@ class BooksBottomSheet extends StatefulWidget {
 }
 
 class _BooksBottomSheetState extends State<BooksBottomSheet> {
+  final _store = VocsyEpubStore();
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -99,11 +103,20 @@ class _BooksBottomSheetState extends State<BooksBottomSheet> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              DefaultButton(
-                  title: 'Ler',
-                  icon: Icons.book_outlined,
-                  onPressed: () => Navigator.pushNamed(context, '/book_view',
-                      arguments: BookViewArguments(book: widget.book))),
+              Observer(builder: (_) {
+                return DefaultButton(
+                    title: _store.isLoading ? 'Carregando' : 'Ler',
+                    icon: _store.isLoading
+                        ? Icons.downloading_outlined
+                        : Icons.book_outlined,
+                    onPressed: () {
+                      if (_store.filePath == "") {
+                        _store.download(widget.book).then((_) => _accessEpub());
+                      } else {
+                        _accessEpub();
+                      }
+                    });
+              }),
               DefaultButton(
                   title: 'Favoritos',
                   icon: Icons.bookmark_add_outlined,
@@ -132,6 +145,21 @@ class _BooksBottomSheetState extends State<BooksBottomSheet> {
       errorBuilder: ((context, error, stackTrace) {
         return const Icon(Icons.error);
       }),
+    );
+  }
+
+  void _accessEpub() {
+    VocsyEpub.setConfig(
+      themeColor: Theme.of(context).primaryColor,
+      identifier: "book",
+      scrollDirection: EpubScrollDirection.ALLDIRECTIONS,
+      allowSharing: true,
+      enableTts: true,
+      nightMode: false,
+    );
+
+    VocsyEpub.open(
+      _store.filePath,
     );
   }
 }
