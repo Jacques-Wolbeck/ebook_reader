@@ -1,6 +1,6 @@
 # ebook_reader
 
-A new Flutter project.
+Para testar basta instalar a APK em um dispositivo Android enviada via link google drive (desafio_2.apk) ou baixar direto pelo repositório em ./assest/apk/app-release.apk 
 
 ## Getting Started
 
