@@ -101,10 +101,13 @@ class _BooksBottomSheetState extends State<BooksBottomSheet> {
           const Divider(),
           Observer(builder: (_) {
             return DefaultButton(
-                title: _store.isLoading ? 'Carregando' : 'Ler',
-                icon: _store.isLoading
-                    ? Icons.downloading_outlined
-                    : Icons.book_outlined,
+                title: _store.isLoading ? 'Carregando...' : 'Ler',
+                leading: _store.isLoading
+                    ? const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: AppProgressIndicator(),
+                      )
+                    : const Icon(Icons.library_books_outlined),
                 onPressed: () {
                   if (_store.filePath == "") {
                     _store.download(widget.book).then((_) => _accessEpub());

@@ -1,7 +1,6 @@
 import 'package:ebook_reader/shared/database/database_controller.dart';
 import 'package:ebook_reader/shared/models/book_model.dart';
 import 'package:ebook_reader/shared/services/api_service.dart';
-import 'package:flutter/material.dart';
 import 'package:mobx/mobx.dart';
 part 'books_store.g.dart';
 
@@ -34,14 +33,12 @@ abstract class _BooksStore with Store {
 
   @action
   Future<void> addFavoriteBook(BookModel book) async {
-    debugPrint('Entrei no add');
     await _db.insert(book);
     favoriteBooksList = await _db.getAllfavorites();
   }
 
   @action
   Future<void> deleteFavoriteBook(BookModel book) async {
-    debugPrint('Entrei no delete');
     await _db.delete(book);
     favoriteBooksList = await _db.getAllfavorites();
   }

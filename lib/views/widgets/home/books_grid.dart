@@ -87,11 +87,9 @@ class _BooksGridState extends State<BooksGrid> {
             iconSize: 35,
             onPressed: () async {
               if (book.isFavorite) {
-                debugPrint('------>ERA FAVORITO');
                 book.isFavorite = false;
                 await _store.deleteFavoriteBook(book);
               } else {
-                debugPrint('------>NAO FAVORITO');
                 book.isFavorite = true;
                 await _store.addFavoriteBook(book);
               }
@@ -119,6 +117,13 @@ class _BooksGridState extends State<BooksGrid> {
           Image.network(
             book.coverUrl,
             fit: BoxFit.fill,
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+              return const Center(child: AppProgressIndicator());
+            },
+            errorBuilder: ((context, error, stackTrace) {
+              return const Center(child: Icon(Icons.error));
+            }),
           ),
           Positioned.fill(
             child: Material(

@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 
 class DefaultButton extends StatelessWidget {
   final String title;
-  final IconData icon;
+  final Widget leading;
   final Function() onPressed;
   const DefaultButton(
       {super.key,
       required this.title,
-      required this.icon,
+      required this.leading,
       required this.onPressed});
 
   @override
@@ -25,7 +25,7 @@ class DefaultButton extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon),
+          leading,
           const SizedBox(width: 8.0),
           Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
         ],
