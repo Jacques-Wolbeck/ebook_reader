@@ -99,30 +99,20 @@ class _BooksBottomSheetState extends State<BooksBottomSheet> {
             ],
           ),
           const Divider(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Observer(builder: (_) {
-                return DefaultButton(
-                    title: _store.isLoading ? 'Carregando' : 'Ler',
-                    icon: _store.isLoading
-                        ? Icons.downloading_outlined
-                        : Icons.book_outlined,
-                    onPressed: () {
-                      if (_store.filePath == "") {
-                        _store.download(widget.book).then((_) => _accessEpub());
-                      } else {
-                        _accessEpub();
-                      }
-                    });
-              }),
-              DefaultButton(
-                  title: 'Favoritos',
-                  icon: Icons.bookmark_add_outlined,
-                  onPressed: () => null),
-            ],
-          )
+          Observer(builder: (_) {
+            return DefaultButton(
+                title: _store.isLoading ? 'Carregando' : 'Ler',
+                icon: _store.isLoading
+                    ? Icons.downloading_outlined
+                    : Icons.book_outlined,
+                onPressed: () {
+                  if (_store.filePath == "") {
+                    _store.download(widget.book).then((_) => _accessEpub());
+                  } else {
+                    _accessEpub();
+                  }
+                });
+          })
         ],
       ),
     );

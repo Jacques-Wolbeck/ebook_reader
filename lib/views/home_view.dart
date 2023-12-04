@@ -1,10 +1,30 @@
 import 'package:ebook_reader/views/widgets/app_title.dart';
+import 'package:ebook_reader/views/widgets/fields/search_field.dart';
 import 'package:ebook_reader/views/widgets/home/books_grid.dart';
 import 'package:ebook_reader/views/widgets/home/books_tab_bar.dart';
 import 'package:flutter/material.dart';
 
-class HomeView extends StatelessWidget {
+class HomeView extends StatefulWidget {
   const HomeView({super.key});
+
+  @override
+  State<HomeView> createState() => _HomeViewState();
+}
+
+class _HomeViewState extends State<HomeView> {
+  final _searchController = TextEditingController();
+  @override
+  void initState() {
+    _searchController.addListener(() => setState(() {}));
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _searchController.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -26,6 +46,7 @@ class HomeView extends StatelessWidget {
           margin: const EdgeInsets.all(16.0),
           child: Column(
             children: [
+              SearchField(controller: _searchController),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: PreferredSize(
@@ -56,7 +77,10 @@ class HomeView extends StatelessWidget {
                     fontWeight: FontWeight.bold)),
               ),
             ),
-            const Expanded(child: BooksGrid())
+            Expanded(
+                child: BooksGrid(
+              searchController: _searchController,
+            ))
           ],
         ),
         Column(
@@ -70,7 +94,9 @@ class HomeView extends StatelessWidget {
                     fontWeight: FontWeight.bold)),
               ),
             ),
-            const Expanded(child: BooksGrid(isFavoriteTab: true))
+            Expanded(
+                child: BooksGrid(
+                    searchController: _searchController, isFavoriteTab: true))
           ],
         ),
       ],

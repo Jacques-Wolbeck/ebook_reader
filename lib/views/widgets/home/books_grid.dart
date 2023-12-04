@@ -6,8 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 
 class BooksGrid extends StatefulWidget {
+  final TextEditingController searchController;
   final bool isFavoriteTab;
-  const BooksGrid({super.key, this.isFavoriteTab = false});
+  const BooksGrid(
+      {super.key, required this.searchController, this.isFavoriteTab = false});
 
   @override
   State<BooksGrid> createState() => _BooksGridState();
@@ -16,6 +18,7 @@ class BooksGrid extends StatefulWidget {
 class _BooksGridState extends State<BooksGrid> {
   final _store = BooksStore();
   final _scrollController = ScrollController();
+  List<BookModel> dataList = [];
 
   @override
   void initState() {
@@ -32,19 +35,17 @@ class _BooksGridState extends State<BooksGrid> {
           child: AppProgressIndicator(),
         );
       } else {
+        dataList = _store.booksList;
         if (widget.isFavoriteTab) {
-          if (_store.favoriteBooksList.isEmpty) {
-            return const Center(child: Text('Sem livros favoritos'));
-          } else {
-            return _booksGridView(_store.favoriteBooksList);
-          }
-        } else {
-          if (_store.booksList.isEmpty) {
-            return const Center(child: Text('Sem livros disponíveis'));
-          } else {
-            return _booksGridView(_store.booksList);
-          }
+          dataList = _store.favoriteBooksList;
         }
+        if (widget.searchController.text.isNotEmpty) {
+          dataList = _searchData(dataList);
+        }
+        if (dataList.isEmpty) {
+          return const Center(child: Text('Sem livros disponíveis'));
+        }
+        return _booksGridView(dataList);
       }
     });
   }
@@ -82,18 +83,19 @@ class _BooksGridState extends State<BooksGrid> {
       header: GridTileBar(
         title: const Text(''),
         trailing: IconButton(
-            alignment: Alignment.bottomCenter,
             color: Colors.red,
             iconSize: 35,
-            onPressed: () {
-              setState(() {});
+            onPressed: () async {
               if (book.isFavorite) {
+                debugPrint('------>ERA FAVORITO');
                 book.isFavorite = false;
-                _store.deleteFavoriteBook(book);
+                await _store.deleteFavoriteBook(book);
               } else {
+                debugPrint('------>NAO FAVORITO');
                 book.isFavorite = true;
-                _store.addFavoriteBook(book);
+                await _store.addFavoriteBook(book);
               }
+              setState(() {});
             },
             icon: book.isFavorite
                 ? const Icon(Icons.bookmark)
@@ -144,5 +146,17 @@ class _BooksGridState extends State<BooksGrid> {
         ],
       ),
     );
+  }
+
+  List<BookModel> _searchData(List<BookModel> booksList) {
+    final List<BookModel> searchResult = [];
+    for (var book in booksList) {
+      if (book.title
+          .toLowerCase()
+          .contains(widget.searchController.text.toLowerCase())) {
+        searchResult.add(book);
+      }
+    }
+    return searchResult;
   }
 }
