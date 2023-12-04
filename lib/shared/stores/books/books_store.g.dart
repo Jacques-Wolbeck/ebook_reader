@@ -25,6 +25,22 @@ mixin _$BooksStore on _BooksStore, Store {
     });
   }
 
+  late final _$favoriteBooksListAtom =
+      Atom(name: '_BooksStore.favoriteBooksList', context: context);
+
+  @override
+  List<BookModel> get favoriteBooksList {
+    _$favoriteBooksListAtom.reportRead();
+    return super.favoriteBooksList;
+  }
+
+  @override
+  set favoriteBooksList(List<BookModel> value) {
+    _$favoriteBooksListAtom.reportWrite(value, super.favoriteBooksList, () {
+      super.favoriteBooksList = value;
+    });
+  }
+
   late final _$isLoadingAtom =
       Atom(name: '_BooksStore.isLoading', context: context);
 
@@ -41,19 +57,63 @@ mixin _$BooksStore on _BooksStore, Store {
     });
   }
 
-  late final _$loadDataAsyncAction =
-      AsyncAction('_BooksStore.loadData', context: context);
+  late final _$isFavoriteLoadingAtom =
+      Atom(name: '_BooksStore.isFavoriteLoading', context: context);
 
   @override
-  Future<void> loadData() {
-    return _$loadDataAsyncAction.run(() => super.loadData());
+  bool get isFavoriteLoading {
+    _$isFavoriteLoadingAtom.reportRead();
+    return super.isFavoriteLoading;
+  }
+
+  @override
+  set isFavoriteLoading(bool value) {
+    _$isFavoriteLoadingAtom.reportWrite(value, super.isFavoriteLoading, () {
+      super.isFavoriteLoading = value;
+    });
+  }
+
+  late final _$loadDataFromApiAsyncAction =
+      AsyncAction('_BooksStore.loadDataFromApi', context: context);
+
+  @override
+  Future<void> loadDataFromApi() {
+    return _$loadDataFromApiAsyncAction.run(() => super.loadDataFromApi());
+  }
+
+  late final _$loadDataFromDatabaseAsyncAction =
+      AsyncAction('_BooksStore.loadDataFromDatabase', context: context);
+
+  @override
+  Future<void> loadDataFromDatabase() {
+    return _$loadDataFromDatabaseAsyncAction
+        .run(() => super.loadDataFromDatabase());
+  }
+
+  late final _$addFavoriteBookAsyncAction =
+      AsyncAction('_BooksStore.addFavoriteBook', context: context);
+
+  @override
+  Future<void> addFavoriteBook(BookModel book) {
+    return _$addFavoriteBookAsyncAction.run(() => super.addFavoriteBook(book));
+  }
+
+  late final _$deleteFavoriteBookAsyncAction =
+      AsyncAction('_BooksStore.deleteFavoriteBook', context: context);
+
+  @override
+  Future<void> deleteFavoriteBook(BookModel book) {
+    return _$deleteFavoriteBookAsyncAction
+        .run(() => super.deleteFavoriteBook(book));
   }
 
   @override
   String toString() {
     return '''
 booksList: ${booksList},
-isLoading: ${isLoading}
+favoriteBooksList: ${favoriteBooksList},
+isLoading: ${isLoading},
+isFavoriteLoading: ${isFavoriteLoading}
     ''';
   }
 }

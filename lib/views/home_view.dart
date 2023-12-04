@@ -70,6 +70,7 @@ class HomeView extends StatelessWidget {
                     fontWeight: FontWeight.bold)),
               ),
             ),
+            const Expanded(child: BooksGrid(isFavoriteTab: true))
           ],
         ),
       ],

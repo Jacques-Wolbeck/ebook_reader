@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 
 class BooksGrid extends StatefulWidget {
-  const BooksGrid({super.key});
+  final bool isFavoriteTab;
+  const BooksGrid({super.key, this.isFavoriteTab = false});
 
   @override
   State<BooksGrid> createState() => _BooksGridState();
@@ -19,28 +20,36 @@ class _BooksGridState extends State<BooksGrid> {
   @override
   void initState() {
     super.initState();
-    _store.loadData();
+    _store.loadDataFromApi();
+    _store.loadDataFromDatabase();
   }
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
     return Observer(builder: (_) {
-      if (_store.isLoading) {
+      if (_store.isLoading || _store.isFavoriteLoading) {
         return const Center(
           child: AppProgressIndicator(),
         );
       } else {
-        if (_store.booksList.isEmpty) {
-          return const Center(child: Text('Sem livros disponíveis'));
+        if (widget.isFavoriteTab) {
+          if (_store.favoriteBooksList.isEmpty) {
+            return const Center(child: Text('Sem livros favoritos'));
+          } else {
+            return _booksGridView(_store.favoriteBooksList);
+          }
         } else {
-          return _booksGridView(_store.booksList, screenSize);
+          if (_store.booksList.isEmpty) {
+            return const Center(child: Text('Sem livros disponíveis'));
+          } else {
+            return _booksGridView(_store.booksList);
+          }
         }
       }
     });
   }
 
-  Widget _booksGridView(List<BookModel> booksList, Size screenSize) {
+  Widget _booksGridView(List<BookModel> booksList) {
     return Scrollbar(
       controller: _scrollController,
       thumbVisibility: true,
@@ -56,54 +65,84 @@ class _BooksGridState extends State<BooksGrid> {
               mainAxisSpacing: 16.0),
           itemBuilder: (context, index) {
             var book = booksList[index];
-            return GridTile(
-              footer: GridTileBar(
-                backgroundColor: Theme.of(context).colorScheme.secondary,
-                title: Text(
-                  book.title,
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary),
-                ),
-                subtitle: Text(
-                  book.author,
-                  style:
-                      TextStyle(color: Theme.of(context).colorScheme.primary),
-                ),
-              ),
-              child: Stack(
-                children: [
-                  Image.network(
-                    book.coverUrl,
-                    fit: BoxFit.fill,
-                  ),
-                  Positioned.fill(
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () {
-                          showModalBottomSheet(
-                              context: context,
-                              isScrollControlled: true,
-                              isDismissible: false,
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(16.0),
-                                    topRight: Radius.circular(16.0)),
-                              ),
-                              builder: (context) {
-                                return BooksBottomSheet(
-                                  book: book,
-                                );
-                              });
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
+            if (widget.isFavoriteTab) {
+              return _booksGridTile(book);
+            }
+            if (_store.favoriteBooksList
+                .any((element) => element.id == book.id)) {
+              book.isFavorite = true;
+            }
+            return _booksGridTile(book);
           }),
+    );
+  }
+
+  Widget _booksGridTile(BookModel book) {
+    return GridTile(
+      header: GridTileBar(
+        title: const Text(''),
+        trailing: IconButton(
+            alignment: Alignment.bottomCenter,
+            color: Colors.red,
+            iconSize: 35,
+            onPressed: () {
+              setState(() {});
+              if (book.isFavorite) {
+                book.isFavorite = false;
+                _store.deleteFavoriteBook(book);
+              } else {
+                book.isFavorite = true;
+                _store.addFavoriteBook(book);
+              }
+            },
+            icon: book.isFavorite
+                ? const Icon(Icons.bookmark)
+                : const Icon(Icons.bookmark_outline_outlined)),
+      ),
+      footer: GridTileBar(
+        backgroundColor: Theme.of(context).colorScheme.secondary,
+        title: Text(
+          book.title,
+          style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primary),
+        ),
+        subtitle: Text(
+          book.author,
+          style: TextStyle(color: Theme.of(context).colorScheme.primary),
+        ),
+      ),
+      child: Stack(
+        children: [
+          Image.network(
+            book.coverUrl,
+            fit: BoxFit.fill,
+          ),
+          Positioned.fill(
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      isDismissible: false,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(16.0),
+                            topRight: Radius.circular(16.0)),
+                      ),
+                      builder: (context) {
+                        return BooksBottomSheet(
+                          book: book,
+                        );
+                      });
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
